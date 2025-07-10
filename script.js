@@ -37,7 +37,7 @@ async function updateDashboard(city) {
   try {
     elements.location.textContent = `📍 ${city}`;
     const weather = await fetchWeather(city);
-    const trend = getLocalTrend(city);
+   const trend = await getLocalTrend(city);
     elements.trends.textContent = `🔥 Local Trend: ${trend}`;
     showRecommendations(weather, trend, city);
   } catch (error) {
@@ -71,11 +71,17 @@ function updateBackground(condition) {
   else document.body.classList.add("cloudy");
 }
 
-function getLocalTrend(city) {
-  const trends = {
-    "New York": ["Broadway shows", "Street food"],
-    "London": ["Royal sights", "Underground art"],
-    "Tokyo": ["Cherry blossoms", "Robot cafes"]
+async function getLocalTrend(city) {
+  try {
+    const res = await fetch(`http://localhost:5000/trends?city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    return data.trend || "local culture";
+  } catch (err) {
+    console.error("Backend trend fetch failed:", err);
+    return "local culture";
+  }
+}
+
   };
   const options = trends[city] || ["Local culture"];
   return options[Math.floor(Math.random() * options.length)];
